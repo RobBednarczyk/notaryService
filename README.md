@@ -20,6 +20,12 @@ Installing Node and NPM is pretty straightforward using the installer package av
 npm init
 ```
 
+- install the required dependencies listed in the package.json file
+
+```
+npm install
+```
+
 
 ## Testing
 
@@ -28,7 +34,7 @@ To test the application:
 1: Make sure you are in the 'main' directory of the project
 2: Start the server by typing
 ```
-node launch.js
+node app.js
 ```
 3: The server is running on "http://localhost:8000"
 
