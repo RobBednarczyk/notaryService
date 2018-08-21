@@ -1,0 +1,19 @@
+{
+  "name": "testwebapp",
+  "version": "1.0.0",
+  "main": "launch.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Robbon",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "crypto-js": "^3.1.9-1",
+    "express": "^4.16.3",
+    "hbs": "^4.0.1",
+    "level": "^4.0.0"
+  },
+  "devDependencies": {},
+  "description": ""
+}

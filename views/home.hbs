@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>My blockchain App</title>
+        <link rel="stylesheet" type="text/css" href="stylesHome.css">
+        <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
+    </head>
+    <body>
+        <div class="main-container">
+            <div class="header">
+                <h1>Private blockchain v 1.0</h1>
+            </div>
+            <div class="block-area">
+                <h2>Current blocks</h2>
+                <div class="blockGrid">
+                    {{#each allBlocks}}
+                        <div class="block">
+                            <p><strong>Body:</strong> {{this.body}}</p>
+                            <p><strong>Hash:</strong> {{this.hash}}</p>
+                            <p><strong>Previous block hash:</strong> {{this.previousBlockHash}}</p>
+                            <p><strong>Created:</strong> {{convertMilToDate this.time}}</p>
+                        </div>
+                    {{/each}}
+                </div>
+            </div>
+            <div class="addBlockBtn">
+                <a href="/newBlock">Add new block </a>
+            </div>
+            <div class="footer">
+                <p>{{getCurrentDate}}</p>
+            </div>
+        </div>
+    </body>
+</html>
