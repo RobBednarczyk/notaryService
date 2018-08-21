@@ -24,6 +24,7 @@ npm init
 ## Testing
 
 To test the application:
+
 1: Make sure you are in the 'main' directory of the project
 2: Start the server by typing
 ```
@@ -42,4 +43,26 @@ node launch.js
 
 There are two API endpoints:
 
-- GET: (user is able to retrieve a block )
+- GET: (user is able to retrieve a block by providing its height)
+
+To access the GET endpoint the user should navigate to:
+http://localhost:8000/block/0
+
+or type the following command into the command line:
+
+```
+curl "http://localhost:8000/block/_blockheight_"
+```
+
+where "_blockheight_" should be an integer
+
+- POST: (user is able to add a new block to the chain)
+
+To access the POST endpoint the user shoud either:
+- navigate to: http://localhost:8000/newBlock
+- click "Add new block" link on the home page
+- type the following command into the command line:
+
+```
+curl -d '{"blockBody":"user input"}' -H "Content-Type: application/json" -X POST http://localhost:8000/newBlock
+```
