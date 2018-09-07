@@ -1,13 +1,45 @@
 const SHA256 = require('crypto-js/sha256');
 const level = require("./levelSandbox.js");
+const users = require("./usersData.js");
 
 async function getAllBlocks() {
     let blocks = await level.getBlocksArray();
     return blocks
 }
 
+async function getAllUsers() {
+    let users = await users.getUsersArray();
+    return users
+}
+
+async function addUser(id) {
+    let user = new Users();
+    user.timestamp = new Date().getTime().toString().slice(0,-3);
+    await users.addDataToLevelDB(id, user);
+    return user
+}
+
+async function getUser(id) {
+    let user = await users.getLevelDBdata(id);
+    return user
+}
+
+async function removeUser(id) {
+    await users.removeUser(id);
+}
+
+// added validated users classes
+class Users{
+    constructor() {
+        this.timestamp = 0,
+        this.signature = "",
+        this.valid = false
+    }
+}
+
 class Block{
-	constructor(data){
+	constructor(userID, data){
+     this.userID = userID,
      this.hash = "",
      this.height = 0,
      this.body = data,
@@ -22,7 +54,7 @@ class Blockchain{
             // check if the blockchain has any blocks
             if (height === 0) {
                 console.log("Starting the genesis block");
-                this.addBlock(new Block("First block in the chain - Genesis block"));
+                this.addBlock(new Block("N/A", "First block in the chain - Genesis block"));
             }
         });
     }
@@ -119,5 +151,10 @@ class Blockchain{
 module.exports = {
     Block,
     Blockchain,
-    getAllBlocks
+    Users,
+    getAllBlocks,
+    getAllUsers,
+    getUser,
+    addUser,
+    removeUser
 }

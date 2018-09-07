@@ -65,10 +65,10 @@ where "_blockheight_" should be an integer
 - POST: (user is able to add a new block to the chain)
 
 To access the POST endpoint the user shoud either:
-- navigate to: http://localhost:8000/newBlock
+- navigate to: http://localhost:8000/block
 - click "Add new block" link on the home page
 - type the following command into the command line:
 
 ```
-curl -d '{"blockBody":"user input"}' -H "Content-Type: application/json" -X POST http://localhost:8000/newBlock
+curl -d '{"block":"user input"}' -H "Content-Type: application/json" -X POST http://localhost:8000/block
 ```

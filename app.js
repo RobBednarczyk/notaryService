@@ -7,6 +7,10 @@ const bodyParser = require("body-parser");
 // load the module with 'Block' and 'Blockchain' classes
 const Struct = require("./chainStructure");
 
+// load the message verification libs
+const bitcoin = require('bitcoinjs-lib');
+const bitcoinMessage = require('bitcoinjs-message');
+
 const port = 8000;
 
 // helper functions to be used in the templates
@@ -63,9 +67,9 @@ app.use(bodyParser.urlencoded({extended:true}));
 app.use(express.static(__dirname + "/public"));
 
 app.get("/", async (req, res) => {
-    let hobby = "football";
+    //let hobby = "football";
     let allBlocks = await Struct.getAllBlocks();
-    //console.log(allBlocks);
+    console.log(allBlocks);
     res.render("home.hbs", {
         allBlocks: allBlocks,
     });
@@ -77,16 +81,73 @@ app.get("/block/:height", async (req, res) => {
         let block = await blockchain.getBlock(blockheight);
         res.send(block);
     } catch(error) {
-        res.render("noSuchBlock.hbs");
+        //res.render("noSuchBlock.hbs");
+        res.send({
+            "error":"There is no such block. Sorry",
+        })
     }
 });
 
-app.get("/newBlock", (req, res) => {
-    res.render("newBlock.hbs");
+app.get("/address/:address", async (req, res) => {
+    let address = req.params.address;
+    try {
+        let user = await Struct.getUser(address);
+    res.send(user);
+    } catch(error) {
+        res.send({
+            "error":"There is no such address. Sorry",
+        })
+    }
+});
+
+// app.get("/block", (req, res) => {
+//     res.render("newBlock.hbs");
+// })
+
+app.get("/block", (req, res) => {
+    res.render("validateUser.hbs");
 })
 
-app.post("/newBlock", async (req, res) => {
-    let body = req.body.blockBody;
+app.post("/requestValidation", async (req, res) => {
+
+    async function sendResponse(user, address) {
+        let date = new Date();
+        let secondsLeft = 60 - Number(date.getTime().toString().slice(0,-3)) + Number(user.timestamp);
+
+        let mesResponse = {
+            message: `${address}:${user.timestamp}:starRegistry`,
+            timestamp: user.timestamp,
+            //secondsLeft: timeLeft,
+            //current: Number(date.getTime().toString().slice(0,-3)),
+        };
+
+        if (secondsLeft < 0) {
+            mesResponse.secondsLeft = "Sorry, time's up. Please resubmit the address";
+            await Struct.removeUser(address);
+        } else {
+            mesResponse.secondsLeft = secondsLeft;
+        }
+
+        res.send(mesResponse);
+    }
+
+    let address = req.body.body;
+    //console.log(typeof address);
+    try {
+        console.log("inside the try")
+        let user = await Struct.getUser(address);
+        sendResponse(user, address);
+    } catch(err) {
+        console.log(err);
+        console.log("inside the catch");
+        let user = await Struct.addUser(address);
+        console.log(user);
+        sendResponse(user, address);
+    }
+})
+
+app.post("/block", async (req, res) => {
+    let body = req.body.body;
     console.log(body);
     let newBlock = new Struct.Block(body);
     let modBlock = await blockchain.addBlock(newBlock);

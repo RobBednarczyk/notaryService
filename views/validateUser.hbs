@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Verify your address</title>
+        <link rel="stylesheet" type="text/css" href="styleNewBlock.css">
+        <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>Please validate your address by signing a message</h1>
+                <h2>Insert your wallet address</h2>
+            </div>
+            <div class="formArea">
+                <form action = "/requestValidation" method = "post" target = "_blank">
+                    <div>
+                        <label for = "walletAddress">Address</label>
+                    </div>
+                    <input type="text" name = "body" id = "walletAddress">
+                    <div>
+                        <input type = "submit" value = "Submit">
+                    </div>
+                </form>
+            </div>
+            <a href="/">Home</a>
+        </div>
+
+    </body>
+</html>

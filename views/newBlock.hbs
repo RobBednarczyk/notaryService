@@ -3,19 +3,28 @@
     <head>
         <meta charset="utf-8">
         <title>Add new block</title>
+        <link rel="stylesheet" type="text/css" href="styleNewBlock.css">
+        <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
     </head>
     <body>
-        <h1>Here you can add a new block</h1>
-        <form action = "/newBlock" method = "post" target = "_blank">
-            <div>
-                <label for = "blockBody">Body</label>
+        <div class="container">
+            <div class="header">
+                <h1>Insert text to be included in the block</h1>
             </div>
-            <textarea name = "blockBody" id = "blockBody" rows = "20" cols = "50">
-            </textarea>
-            <div>
-                <input type = "submit" value = "Add">
+            <div class="formArea">
+                <form action = "/block" method = "post" target = "_blank">
+                    <div>
+                        <label for = "blockBody">Body</label>
+                    </div>
+                    <textarea name = "body" id = "blockBody" rows = "20" cols = "50">
+                    </textarea>
+                    <div>
+                        <input type = "submit" value = "Add">
+                    </div>
+                </form>
             </div>
-        </form>
-        <a href="/">Home</a>
+            <a href="/">Home</a>
+        </div>
+
     </body>
 </html>
