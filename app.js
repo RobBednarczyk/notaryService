@@ -111,16 +111,17 @@ app.post("/requestValidation", async (req, res) => {
         let secondsLeft = 300 - Number(date.getTime().toString().slice(0,-3)) + Number(user.timestamp);
 
         let mesResponse = {
+            address: address,
             message: `${address}:${user.timestamp}:starRegistry`,
-            timestamp: user.timestamp,
+            requestTimeStamp: user.timestamp,
 
         };
 
         if (secondsLeft < 0) {
-            mesResponse.secondsLeft = "Sorry, time's up. Please resubmit the address";
+            mesResponse.walidationWindow = "Sorry, time's up. Please resubmit the address";
             await Struct.removeUser(address);
         } else {
-            mesResponse.secondsLeft = secondsLeft;
+            mesResponse.walidationWindow = secondsLeft;
         }
 
         res.send(mesResponse);
@@ -205,23 +206,23 @@ app.post("/block", async (req, res) => {
 
     // get the provided address
     let address = req.body.address;
-    console.log(address);
+    //console.log(address);
     // get the user from the db
     try {
         let user = await Struct.getUser(address);
-        console.log(user);
-        console.log(user.valid);
+        //console.log(user);
+        //console.log(user.valid);
         if (!user.valid) {
             //res.render("userNotValid.hbs");
             res.send({
                 "error":"address has not been validated"
             })
         } else {
-            console.log("before test");
+            //console.log("before test");
             let starObj = req.body.star;
-            console.log(starObj);
+            //console.log(starObj);
             if (starObj) {
-                console.log("inside extended");
+                //console.log("inside extended");
                 const storyText = Buffer.from(String(starObj.story.trim()), "ascii");
                 const encodedStory = storyText.toString("hex");
                 var star = {
@@ -229,11 +230,11 @@ app.post("/block", async (req, res) => {
                     "mag": starObj.magnitude,
                     "ra": starObj.ra,
                     "const": starObj.constellation,
-                    "encStory": encodedStory,
-                    "story": starObj.story,
+                    "story": encodedStory,
+                    "decStory": starObj.story.trim(),
                 }
             } else {
-                console.log("inside normal");
+                //console.log("inside normal");
                 const storyText = Buffer.from(String(req.body.story.trim()), "ascii");
                 const encodedStory = storyText.toString("hex");
                 var star = {
@@ -241,10 +242,10 @@ app.post("/block", async (req, res) => {
                     "mag": req.body.magnitude,
                     "ra": req.body.ra,
                     "const": req.body.constellation,
-                    "encStory": encodedStory,
-                    "story": req.body.story,
+                    "story": encodedStory,
+                    "decStory": req.body.story.trim(),
                 }
-                console.log(star);
+                //console.log(star);
             }
 
 
@@ -252,9 +253,9 @@ app.post("/block", async (req, res) => {
                 "address": address,
                 "star": star,
             };
-            console.log(blockBody);
+            //console.log(blockBody);
             let newBlock = new Struct.Block(address, blockBody);
-            console.log(newBlock);
+            //console.log(newBlock);
             try {
                 let modBlock = await blockchain.addBlock(newBlock);
                 let response = {
@@ -265,16 +266,19 @@ app.post("/block", async (req, res) => {
                     "previousBlockHash": modBlock.previousBlockHash,
                 };
 
+                // remove the address after every star registration
+                await Struct.removeUser(address);
+
                 res.send(response);
             } catch(err) {
                 res.send({
-                    "error": err
+                    "error": "Please validate the address"
                 })
             }
         }
     } catch(err) {
         res.send({
-            "error": err
+            "error": "Please validate the address"
         })
     }
 

@@ -79,8 +79,8 @@ class Blockchain{
         let height = await level.getChainHeight();
         newBlock.height = height + 1;
 
-        if (height >= 1) {
-            let previousBlock = await level.getLevelDBdata(height);
+        if (height > 0) {
+            let previousBlock = await level.getLevelDBdata(height - 1);
             newBlock.previousBlockHash = previousBlock.hash;
         }
 

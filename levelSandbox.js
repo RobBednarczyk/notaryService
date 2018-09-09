@@ -23,7 +23,7 @@ async function getLevelDBdata(key) {
 
 // Add data to levelDB with value
 function addDataToLevelDB(value) {
-    let i = 1;
+    let i = 0;
     db.createReadStream().on('data', function(data) {
           i++;
         }).on('error', function(err) {
