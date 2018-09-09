@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Verify your address</title>
+        <link rel="stylesheet" type="text/css" href="styleNewBlock.css">
+        <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>Please provide the details in order to register a star</h1>
+            </div>
+            <div class="formArea">
+                <form action = "/block" method = "post" target = "_blank">
+                    <div>
+                        <label for = "walletAddress"><strong>Address</strong></label>
+                    </div>
+                    <input type="text" name = "address" id = "walletAddress">
+                    <div>
+                        <label for = "RA"><strong>Right Ascension</strong></label>
+                    </div>
+                    <input type="text" name = "ra" id = "RA">
+                    <div>
+                        <label for = "declination"><strong>Declination</strong></label>
+                    </div>
+                    <input type="text" name = "declination" id = "declination">
+                    <div>
+                        <label for = "magnitude"><strong>Magnitude (optional)</strong></label>
+                    </div>
+                    <input type="text" name = "magnitude" id = "magnitude">
+                    <div>
+                        <label for = "constellation"><strong>Constellation (optional)</strong></label>
+                    </div>
+                    <input type="text" name = "constellation" id = "constellation">
+                    <div>
+                        <label for = "story"><strong>Story</strong></label>
+                    </div>
+                    <textarea name = "story" id = "story" rows="4" cols="50" maxlength="250">
+                        Enter the story here...
+                    </textarea>
+
+                    <div>
+                        <input type = "submit" value = "Submit">
+                    </div>
+                </form>
+            </div>
+
+        </div>
+        <a href="/">Home</a>
+    </body>
+</html>

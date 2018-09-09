@@ -7,6 +7,7 @@ const bodyParser = require("body-parser");
 // load the module with 'Block' and 'Blockchain' classes
 const Struct = require("./chainStructure");
 
+
 // load the message verification libs
 const bitcoin = require('bitcoinjs-lib');
 const bitcoinMessage = require('bitcoinjs-message');
@@ -67,9 +68,8 @@ app.use(bodyParser.urlencoded({extended:true}));
 app.use(express.static(__dirname + "/public"));
 
 app.get("/", async (req, res) => {
-    //let hobby = "football";
     let allBlocks = await Struct.getAllBlocks();
-    console.log(allBlocks);
+    //console.log(allBlocks);
     res.render("home.hbs", {
         allBlocks: allBlocks,
     });
@@ -81,7 +81,6 @@ app.get("/block/:height", async (req, res) => {
         let block = await blockchain.getBlock(blockheight);
         res.send(block);
     } catch(error) {
-        //res.render("noSuchBlock.hbs");
         res.send({
             "error":"There is no such block. Sorry",
         })
@@ -92,7 +91,7 @@ app.get("/address/:address", async (req, res) => {
     let address = req.params.address;
     try {
         let user = await Struct.getUser(address);
-    res.send(user);
+        res.send(user);
     } catch(error) {
         res.send({
             "error":"There is no such address. Sorry",
@@ -104,21 +103,17 @@ app.get("/address/:address", async (req, res) => {
 //     res.render("newBlock.hbs");
 // })
 
-app.get("/block", (req, res) => {
-    res.render("validateUser.hbs");
-})
 
 app.post("/requestValidation", async (req, res) => {
 
     async function sendResponse(user, address) {
         let date = new Date();
-        let secondsLeft = 60 - Number(date.getTime().toString().slice(0,-3)) + Number(user.timestamp);
+        let secondsLeft = 300 - Number(date.getTime().toString().slice(0,-3)) + Number(user.timestamp);
 
         let mesResponse = {
             message: `${address}:${user.timestamp}:starRegistry`,
             timestamp: user.timestamp,
-            //secondsLeft: timeLeft,
-            //current: Number(date.getTime().toString().slice(0,-3)),
+
         };
 
         if (secondsLeft < 0) {
@@ -131,27 +126,196 @@ app.post("/requestValidation", async (req, res) => {
         res.send(mesResponse);
     }
 
-    let address = req.body.body;
-    //console.log(typeof address);
+    let address = req.body.address;
+
     try {
-        console.log("inside the try")
+
         let user = await Struct.getUser(address);
-        sendResponse(user, address);
+
+        // check if the address has already been validated
+        if (user.valid) {
+            let response = {
+                "address": address,
+                "requestTimeStamp": user.timestamp,
+                "message": `${address}:${user.timestamp}:starRegistry`,
+                "validationWindow": 300
+            }
+            res.send(response);
+        } else {
+            sendResponse(user, address);
+        }
+
     } catch(err) {
-        console.log(err);
-        console.log("inside the catch");
+
         let user = await Struct.addUser(address);
-        console.log(user);
+
         sendResponse(user, address);
     }
 })
 
-app.post("/block", async (req, res) => {
-    let body = req.body.body;
-    console.log(body);
-    let newBlock = new Struct.Block(body);
-    let modBlock = await blockchain.addBlock(newBlock);
-    res.send(modBlock);
+
+app.post("/message-signature/validate", async (req, res) => {
+
+    let address = req.body.address;
+    let signature = req.body.signature;
+    let user = await Struct.getUser(address);
+    let message = `${address}:${user.timestamp}:starRegistry`;
+
+    var registerStatus = false;
+    var messageSignature = "invalid";
+
+
+    // validate the given signature
+    if (bitcoinMessage.verify(message, address, signature)) {
+
+        // change the valid status of the address
+        await Struct.modUser(address, user.timestamp, true);
+
+        registerStatus = true,
+        messageSignature = "valid";
+    }
+
+    res.send({
+        "registerStar": registerStatus,
+        "status": {
+            "address": address,
+            "requestTimeStamp": user.timestamp,
+            "message": `${address}:${user.timestamp}:starRegistry`,
+            "validationWindow": (() => {
+                let date = new Date();
+                let secondsLeft = Math.max(300 - Number(date.getTime().toString().slice(0,-3)) + Number(user.timestamp), 0);
+                return secondsLeft;
+            })(),
+            "messageSignature": messageSignature
+        }
+    });
 })
+
+// render the star registration page
+app.get("/regPage", (req, res) => {
+    res.render("registerStar.hbs");
+});
+
+// provide method to register a star
+app.get("/block", (req, res) => {
+    res.render("validateUser.hbs");
+})
+
+app.post("/block", async (req, res) => {
+
+    // get the provided address
+    let address = req.body.address;
+    console.log(address);
+    // get the user from the db
+    try {
+        let user = await Struct.getUser(address);
+        console.log(user);
+        console.log(user.valid);
+        if (!user.valid) {
+            //res.render("userNotValid.hbs");
+            res.send({
+                "error":"address has not been validated"
+            })
+        } else {
+            console.log("before test");
+            let starObj = req.body.star;
+            console.log(starObj);
+            if (starObj) {
+                console.log("inside extended");
+                const storyText = Buffer.from(String(starObj.story.trim()), "ascii");
+                const encodedStory = storyText.toString("hex");
+                var star = {
+                    "dec": starObj.declination,
+                    "mag": starObj.magnitude,
+                    "ra": starObj.ra,
+                    "const": starObj.constellation,
+                    "encStory": encodedStory,
+                    "story": starObj.story,
+                }
+            } else {
+                console.log("inside normal");
+                const storyText = Buffer.from(String(req.body.story.trim()), "ascii");
+                const encodedStory = storyText.toString("hex");
+                var star = {
+                    "dec": req.body.declination,
+                    "mag": req.body.magnitude,
+                    "ra": req.body.ra,
+                    "const": req.body.constellation,
+                    "encStory": encodedStory,
+                    "story": req.body.story,
+                }
+                console.log(star);
+            }
+
+
+            let blockBody = {
+                "address": address,
+                "star": star,
+            };
+            console.log(blockBody);
+            let newBlock = new Struct.Block(address, blockBody);
+            console.log(newBlock);
+            try {
+                let modBlock = await blockchain.addBlock(newBlock);
+                let response = {
+                    "hash": modBlock.hash,
+                    "height": modBlock.height,
+                    "body": modBlock.body,
+                    "time": modBlock.time,
+                    "previousBlockHash": modBlock.previousBlockHash,
+                };
+
+                res.send(response);
+            } catch(err) {
+                res.send({
+                    "error": err
+                })
+            }
+        }
+    } catch(err) {
+        res.send({
+            "error": err
+        })
+    }
+
+});
+
+// get the stars by wallet address
+app.get("/stars/address::address", async (req, res) => {
+
+    let address = req.params.address;
+
+    let allStars = await Struct.getAllBlocks();
+    let starsByAddress = [];
+    for (var i = 0; i < allStars.length; i++) {
+        if (allStars[i].userID === address) {
+            starsByAddress.push(allStars[i]);
+        }
+    }
+
+    res.send(starsByAddress);
+
+});
+
+// get the star by its hash
+app.get("/stars/hash::hash", async (req, res) => {
+    let hash = req.params.hash;
+    console.log(hash);
+    let allStars = await Struct.getAllBlocks();
+    let starByHash = [];
+    for (var i = 0; i < allStars.length; i++) {
+        if (allStars[i].hash === hash) {
+            starByHash.push(allStars[i]);
+        }
+    }
+
+    res.send(starByHash);
+
+    // uncomment if a webpage is to be sent
+    // res.render("starsByAddress.hbs", {
+    //     stars : starByHash,
+    // })
+
+});
 
 app.listen(port, () => console.log(`Server started on port: ${port}`));

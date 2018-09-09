@@ -10,18 +10,39 @@
         <div class="container">
             <div class="header">
                 <h1>Please validate your address by signing a message</h1>
-                <h2>Insert your wallet address</h2>
+                <h2>Insert your wallet address...</h2>
+                <h2>...and then the signature provided by your wallet</h2>
             </div>
             <div class="formArea">
                 <form action = "/requestValidation" method = "post" target = "_blank">
+                    <p><em>Get your message by providing the address</em></p>
                     <div>
-                        <label for = "walletAddress">Address</label>
+                        <label for = "walletAddress"><strong>Address</strong></label>
                     </div>
-                    <input type="text" name = "body" id = "walletAddress">
+                    <input type="text" name = "address" id = "walletAddress">
                     <div>
                         <input type = "submit" value = "Submit">
                     </div>
                 </form>
+                <div class="starRegPage">
+                    <p><em>... or access the star registration page</em></p>
+                    <a href="/regPage">Registration</a>
+                </div>
+                <form action="/message-signature/validate" method="post" target = "_blank">
+                    <p><em>Verify you identity</em></p>
+                    <div>
+                        <label for = "walletAddress"><strong>Address</strong></label>
+                    </div>
+                    <input type="text" name = "address" id = "walletAddress">
+                    <div>
+                        <label for = "messageSignature"><strong>Signature</strong></label>
+                    </div>
+                    <input type="text" name = "signature" id = "messageSignature">
+                    <div>
+                        <input type = "submit" value = "Submit">
+                    </div>
+                </form>
+
             </div>
             <a href="/">Home</a>
         </div>

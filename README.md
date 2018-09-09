@@ -1,6 +1,6 @@
 # Blockchain Data
 
-This project aims to present a simple private blockchain that is supported by the levelDB database.
+This project aims to present a simple notary service that is supported by a private blockchain.
 It was created using the express.js framework
 
 ## Getting Started
@@ -38,37 +38,89 @@ node app.js
 ```
 3: The server is running on "http://localhost:8000"
 
-4: The genesis block is created automatically and added to the blockchain
+4: The genesis block is created automatically and added to the blockchain.
+   In this application the body of every block consists of the spherical coordinates
+   of the stars that can be found on the celestial sphere
 5: The user is able to add a new block by:
 
 - clicking the 'Add block' button
-- typing the new block body in the text box
-- clicking the 'Add' button
+- getting a message to be signed using a blockchain wallet
+- verifying the address by signing the provided message
 
 ## API endponts
 
-There are two API endpoints:
+1: In order to verify an address a user needs to either:
 
-- GET: (user is able to retrieve a block by providing its height)
+- click "Add new block" button on the home page http://localhost:8000/
+ or navigate to http://localhost:8000/block
+- provide a valid blockchain address in the "Address" field and click "Submit"
+- retrieve a message to be signed from the JSON response
+- sign the message using a blockchain wallet
+- input the address and signature into the second form on http://localhost:8000/
 
-To access the GET endpoint the user should navigate to:
-http://localhost:8000/block/0
+or:
 
-or type the following command into the command line:
-
-```
-curl "http://localhost:8000/block/_blockheight_"
-```
-
-where "_blockheight_" should be an integer
-
-- POST: (user is able to add a new block to the chain)
-
-To access the POST endpoint the user shoud either:
-- navigate to: http://localhost:8000/block
-- click "Add new block" link on the home page
-- type the following command into the command line:
+- type the following commands into the command line:
 
 ```
-curl -d '{"block":"user input"}' -H "Content-Type: application/json" -X POST http://localhost:8000/block
+curl -X "POST" "http://localhost:8000/requestValidation" -H "Content-Type: application/json; charset=utf-8" -d '{"address":"_address_"}'
+
+```
+where "_address_" should be a valid blockchain address
+
+```
+curl -X "POST" "http://localhost:8000/message-signature/validate" -H "Content-Type: application/json;charset=utf-8" -d '{"address":"_address_", "signature":"_signature_"}'
+
+```
+where "_signature_" is a signed message
+
+2: After a successful verification a user is able to register a star using the notary service
+by providing required details. This can be done in two ways:
+
+- navigate to "http://localhost:8000/block"
+- click "Registration" button
+- fill in the required details and click "Submit"
+
+or:
+
+- type one of the following commands
+
+```
+curl -X "POST" "http://localhost:8000/block" -H "Content-Type: application/json; charset=utf-8" -d '{"address":"_address_", "star":{"ra":"_rightAscension_", "declination":"_declination_", "magnitude":"_magnitude_", "constellation":"_constellation_", "story":"_story_"}}'
+```
+
+```
+curl -X "POST" "http://localhost:8000/block" -H "Content-Type: application/json; charset=utf-8" -d '{"address":"_address_", "ra":"_rightAscension_", "declination":"_declination_", "magnitude":"_magnitude_", "constellation":"_constellation", "story":"_story_"}'
+```
+
+where "_story_" is a short description of the star being registered
+
+3: User is able to browse the registered stars by using one of the following functionalities:
+
+=> stars registered by an address:
+- navigate to http://localhost:8000/stars/address:[ADDRESS]
+
+or:
+- type
+```
+curl "http://localhost:8000/stars/address:_address_"
+
+```
+
+=> star by hash number:
+- navigate to http://localhost:8000/stars/hash:[HASH]
+
+or:
+- type
+```
+curl "http://localhost:8000/stars/hash:_hash_"
+```
+
+=> star by block height
+- navigate to http://localhost:8000/block/[HEIGHT]
+
+or:
+- type
+```
+curl "http://localhost:8000/block/_height_"
 ```

@@ -49,6 +49,15 @@ body {
     margin-bottom: 10px;
 }
 
+.block ul {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+
 .block:nth-child(even) {
     border-top: 1px solid #0099cc;
     background: #66d9ff;

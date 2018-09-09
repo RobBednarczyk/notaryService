@@ -19,6 +19,15 @@ async function addUser(id) {
     return user
 }
 
+async function modUser(id, timestamp, valid) {
+    removeUser(id);
+    let user = new Users();
+    user.timestamp = timestamp;
+    user.valid = valid;
+    await users.addDataToLevelDB(id, user);
+    return user
+}
+
 async function getUser(id) {
     let user = await users.getLevelDBdata(id);
     return user
@@ -54,7 +63,13 @@ class Blockchain{
             // check if the blockchain has any blocks
             if (height === 0) {
                 console.log("Starting the genesis block");
-                this.addBlock(new Block("N/A", "First block in the chain - Genesis block"));
+                //this.addBlock(new Block("N/A", "First block in the chain - Genesis block"));
+                this.addBlock(new Block("N/A", {"address":"N/A", "star":{
+                    "dec" : "+05°30'",
+                    "mag" : "-26.74 (V)",
+                    "ra" : "11h08m",
+                    "story": "The Sun. It is the primary source of energy on the Earth"
+                }}));
             }
         });
     }
@@ -64,8 +79,8 @@ class Blockchain{
         let height = await level.getChainHeight();
         newBlock.height = height + 1;
 
-        if (height > 0) {
-            let previousBlock = await level.getLevelDBdata(height - 1);
+        if (height >= 1) {
+            let previousBlock = await level.getLevelDBdata(height);
             newBlock.previousBlockHash = previousBlock.hash;
         }
 
@@ -156,5 +171,6 @@ module.exports = {
     getAllUsers,
     getUser,
     addUser,
-    removeUser
+    removeUser,
+    modUser
 }

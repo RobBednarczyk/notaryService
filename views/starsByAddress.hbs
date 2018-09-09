@@ -14,7 +14,7 @@
             <div class="block-area">
                 <h2>Current stars</h2>
                 <div class="blockGrid">
-                    {{#each allBlocks}}
+                    {{#each stars}}
                         <div class="block">
                             <ul><strong>Body:</strong>
                                 <li><em>Right ascension:</em> {{this.body.star.ra}}</li>
@@ -30,9 +30,6 @@
                         </div>
                     {{/each}}
                 </div>
-            </div>
-            <div class="addBlockBtn">
-                <a href="/block">Add new block </a>
             </div>
             <div class="footer">
                 <p>{{getCurrentDate}}</p>
