@@ -125,10 +125,10 @@ app.post("/requestValidation", async (req, res) => {
         };
 
         if (validationWindow(user) === 0) {
-            mesResponse.walidationWindow = "Sorry, time's up. Please resubmit the address";
+            mesResponse.validationWindow = "Sorry, time's up. Please resubmit the address";
             await Struct.removeUser(address);
         } else {
-            mesResponse.walidationWindow = validationWindow(user);;
+            mesResponse.validationWindow = validationWindow(user);;
         }
 
         res.send(mesResponse);
@@ -249,165 +249,104 @@ app.get("/block", (req, res) => {
 
 app.post("/block", async (req, res) => {
 
-    // get the provided address
+
 	try {
+        // get the provided address
 		var address = req.body.address;
 		if (!address) throw "Please provide the address";
-	}
-	catch(err) {
-		res.send({
-			"error": err,
-		})
-	}
-    // get the user from the db
-    try {
+
+        // get the user from the db
+
         var user = await Struct.getUser(address);
 		if (!(user && user.valid)) throw "The address is not valid. Please send a request one more time";
-	}
+
+	    var starObj = req.body.star;
+		// check if the request has a star property
+        if (!starObj) {
+
+            var decodedStory = req.body.story;
+            decodedStory.trim();
+			if (!decodedStory) throw "Please provide the story";
+
+            const storyText = Buffer.from(String(decodedStory.trim()), "ascii");
+            const encodedStory = storyText.toString("hex");
+            var dec = req.body.declination;
+            var mag = req.body.magnitude;
+            var ra = req.body.ra;
+            if (!(dec && ra)) throw "Please provide the required coordinates";
+            var star = {
+                "dec": dec,
+                "mag": mag,
+                "ra": ra,
+                "const": req.body.constellation,
+                "story": encodedStory,
+                "decStory": decodedStory.trim(),
+            };
+            var blockBody = {
+                "address": address,
+                "star": star,
+            };
+            var newBlock = new Struct.Block(address, blockBody);
+
+            var modBlock = await blockchain.addBlock(newBlock);
+            var response = {
+                "hash": modBlock.hash,
+                "height": modBlock.height,
+                "body": modBlock.body,
+                "time": modBlock.time,
+                "previousBlockHash": modBlock.previousBlockHash,
+            };
+
+            // remove the address after every star registration
+            await Struct.removeUser(address);
+            res.send(response);
+
+	    } else {
+
+    		var decodedStory = starObj.story;
+
+            decodedStory.trim();
+			if (!decodedStory) throw "Please provide the story";
+
+            const storyText = Buffer.from(String(decodedStory.trim()), "ascii");
+            const encodedStory = storyText.toString("hex");
+            var dec = starObj.declination;
+            var mag = starObj.magnitude;
+            var ra = starObj.ra;
+            if (!(dec && ra)) throw "Please provide the required coordinates";
+            var star = {
+                "dec": dec,
+                "mag": mag,
+                "ra": ra,
+                "const": starObj.constellation,
+                "story": encodedStory,
+                "decStory": decodedStory.trim(),
+            };
+            var blockBody = {
+                "address": address,
+                "star": star,
+            };
+
+            var newBlock = new Struct.Block(address, blockBody);
+
+            var modBlock = await blockchain.addBlock(newBlock);
+            var response = {
+                "hash": modBlock.hash,
+                "height": modBlock.height,
+                "body": modBlock.body,
+                "time": modBlock.time,
+                "previousBlockHash": modBlock.previousBlockHash,
+            };
+                // remove the address after every star registration
+            await Struct.removeUser(address);
+            res.send(response);
+        }
+    }
 	catch(err) {
 		res.send({
 			"error": err,
 		});
 	}
-
-    //console.log("before test");
-	//try {
-	var starObj = req.body.star;
-			// check if the request has a star property
-        if (!starObj) {
-			try {
-				var decodedStory = req.body.story;
-                decodedStory.trim();
-				if (!decodedStory) throw "Please provide the story";
-            }
-            catch(err) {
-                res.send({
-                    "error":err,
-                })
-            }
-            try {
-                const storyText = Buffer.from(String(decodedStory.trim()), "ascii");
-                const encodedStory = storyText.toString("hex");
-                var dec = req.body.declination;
-                var mag = req.body.magnitude;
-                var ra = req.body.ra;
-                if (!(dec && ra)) throw "Please provide the required coordinates";
-                var star = {
-                    "dec": dec,
-                    "mag": mag,
-                    "ra": ra,
-                    "const": req.body.constellation,
-                    "story": encodedStory,
-                    "decStory": decodedStory.trim(),
-                };
-                let blockBody = {
-                    "address": address,
-                    "star": star,
-                };
-                //console.log(blockBody);
-                let newBlock = new Struct.Block(address, blockBody);
-                //console.log(newBlock);
-                try {
-                    let modBlock = await blockchain.addBlock(newBlock);
-                    let response = {
-                        "hash": modBlock.hash,
-                        "height": modBlock.height,
-                        "body": modBlock.body,
-                        "time": modBlock.time,
-                        "previousBlockHash": modBlock.previousBlockHash,
-                    };
-
-                    // remove the address after every star registration
-                    await Struct.removeUser(address);
-                    res.send(response);
-                } catch(err) {
-                    res.send({
-                        "error": "Please validate the address"
-                    });
-                }
-            }
-            catch(err) {
-                res.send({
-					"error":err,
-				});
-			}
-				// catch(err) {
-				// 	res.send({
-				// 		"error": err,
-				// 	});
-				// }
-		} else {
-			try {
-    			var decodedStory = starObj.story;
-                decodedStroy.trim();
-				if (!decodedStory) throw "Please provide the story";
-            }
-            catch(err) {
-                res.send({
-                    "error":err,
-                });
-            }
-            try {
-                const storyText = Buffer.from(String(starObj.story.trim()), "ascii");
-                const encodedStory = storyText.toString("hex");
-                var dec = starObj.declination;
-                var mag = starObj.magnitude;
-                var ra = starObj.ra;
-                if (!(dec && ra)) throw "Please provide the required coordinates"
-                var star = {
-                    "dec": dec,
-                    "mag": mag,
-                    "ra": ra,
-                    "const": starObj.constellation,
-                    "story": encodedStory,
-                    "decStory": decodedStory.trim(),
-                };
-                let blockBody = {
-                    "address": address,
-                    "star": star,
-                };
-                    //console.log(blockBody);
-                let newBlock = new Struct.Block(address, blockBody);
-                    //console.log(newBlock);
-                try {
-                    let modBlock = await blockchain.addBlock(newBlock);
-                    let response = {
-                        "hash": modBlock.hash,
-                        "height": modBlock.height,
-                        "body": modBlock.body,
-                        "time": modBlock.time,
-                        "previousBlockHash": modBlock.previousBlockHash,
-                    };
-
-                        // remove the address after every star registration
-                    await Struct.removeUser(address);
-
-                    res.send(response);
-                } catch(err) {
-                    res.send({
-                        "error": "Please validate the address"
-                    });
-                }
-            }
-			catch(err) {
-				res.send({
-					"error": err,
-				});
-			}
-
-				// }
-				// catch(err) {
-				// 	res.send({
-				// 		"error": err,
-				// 	});
-				// }
-		}
-
-    // } catch(err) {
-	// 	res.send({
-	// 		"error": err,
-	// 	})
-	// }
 
 });
 
