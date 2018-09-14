@@ -29,7 +29,7 @@ async function modUser(id, timestamp, valid) {
 }
 
 async function getUser(id) {
-    let user = await users.getLevelDBdata(id);
+    var user = await users.getLevelDBdata(id);
     return user
 }
 
@@ -77,7 +77,8 @@ class Blockchain{
   // Add new block
     async addBlock(newBlock) {
         let height = await level.getChainHeight();
-        newBlock.height = height + 1;
+        //newBlock.height = height + 1;
+		newBlock.height = height;
 
         if (height > 0) {
             let previousBlock = await level.getLevelDBdata(height - 1);

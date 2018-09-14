@@ -15,9 +15,17 @@ function addLevelDBdata(key,value){
 
 // get data from levelDB with key
 async function getLevelDBdata(key) {
-    let userString = await db.get(key);
-    let user = await JSON.parse(userString);
-    return user;
+    try {
+        var userString = await db.get(key);
+        var user = await JSON.parse(userString);
+        return user;
+    }
+    catch(err) {
+        if (err.notFound) {
+            return
+        }
+    }
+
 }
 
 
